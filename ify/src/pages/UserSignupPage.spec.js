@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  render,
-  screen,
-  cleanup,
-  fireEvent,
-  waitFor,
-} from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 import UserSignupPage from './UserSignupPage';
 
@@ -24,8 +17,6 @@ const passwordInputPlaceholderText = 'Your password';
 const passwordRepeatInputPlaceholderText = 'Repeat your password';
 
 let button, displayNameInput, usernameInput, passwordInput, passwordRepeatInput;
-
-beforeEach(cleanup);
 
 describe('UserSignupPage', () => {
   describe('Layout', () => {
@@ -257,6 +248,26 @@ describe('UserSignupPage', () => {
 
       const spinner = screen.queryByText('Loading...');
       await waitFor(() => expect(spinner).not.toBeInTheDocument());
+    });
+
+    it('displays validation error for displayName when error is received for the field', async () => {
+      const actions = {
+        postSignup: jest.fn().mockRejectedValue({
+          response: {
+            data: {
+              validationErrors: {
+                displayName: 'Cannot be null',
+              },
+            },
+          },
+        }),
+      };
+
+      setupForSubmit(actions);
+      fireEvent.click(button);
+
+      const errorMessage = await screen.findByText('Cannot be null');
+      expect(errorMessage).toBeInTheDocument();
     });
   });
 });

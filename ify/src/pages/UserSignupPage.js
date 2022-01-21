@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-
+import Input from '../components/Input';
 const UserSignupPage = ({ actions }) => {
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [passwordRepeat, setPasswordRepeat] = useState('');
   const [pendingApiCall, setPendingApiCall] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const onChangeDisplayName = (event) => {
     const value = event.target.value;
@@ -35,58 +36,63 @@ const UserSignupPage = ({ actions }) => {
     };
 
     setPendingApiCall(true);
-    
+
     actions
       .postSignup(user)
       .then((_) => setPendingApiCall(false))
-      .catch((_) => setPendingApiCall(false));
+      .catch((apiError) => {
+        const { data } = apiError.response;
+        if (data && data.validationErrors) {
+          setErrors({ ...data.validationErrors });
+        }
+
+        setPendingApiCall(false);
+      });
   };
 
   return (
     <div className="container">
       <h1 className="text-center">Sign Up</h1>
       <div className="col-12 mb-3">
-        <label htmlFor="displayName">Display Name</label>
-        <input
-          className="form-control"
-          name="displayName"
-          type="text"
+        <Input
+          label="Display Name"
           placeholder="Your display name"
           value={displayName}
           onChange={onChangeDisplayName}
+          hasError={errors.displayName && true}
+          error={errors.displayName}
         />
       </div>
       <div className="col-12 mb-3">
-        <label htmlFor="username">Username</label>
-        <input
-          className="form-control"
-          name="username"
-          type="text"
+        <Input
+          label="Username"
           placeholder="Your username"
           value={username}
           onChange={onChangeUsername}
+          hasError={errors.username && true}
+          error={errors.username}
         />
       </div>
       <div className="col-12 mb-3">
-        <label htmlFor="password">Password</label>
-        <input
-          className="form-control"
-          name="password"
+        <Input
+          label="Password"
           type="password"
           placeholder="Your password"
           value={password}
           onChange={onChangePassword}
+          hasError={errors.password && true}
+          error={errors.password}
         />
       </div>
       <div className="col-12 mb-3">
-        <label htmlFor="passwordRepeat">Password Repeat</label>
-        <input
-          className="form-control"
-          name="passwordRepeat"
+        <Input
+          label="Password Repeat"
           type="password"
           placeholder="Repeat your password"
           value={passwordRepeat}
           onChange={onChangePasswordRepeat}
+          hasError={errors.passwordRepeat && true}
+          error={errors.passwordRepeat}
         />
       </div>
       <div className="text-center">
